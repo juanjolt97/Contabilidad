@@ -18,7 +18,11 @@
     </nav>
 
     <main class="container">
-        <h2 th:text="'Movimientos - Categoría: ' + ${categoriaActual}"></h2>
+        <h2>
+            <span class="sr-only">Movimientos por Categoría:</span>
+            Movimientos - Categoría: 
+            <span th:text="${categoriaActual != null && !#strings.isEmpty(categoriaActual) ? categoriaActual : 'Sin categoría'}">Sin categoría</span>
+        </h2>
 
         <div class="resumen-container" th:object="${resumen}">
             <div class="resumen-card card-balance">

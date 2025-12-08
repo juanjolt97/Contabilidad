@@ -1,14 +1,13 @@
 package com.app.contabilidad.application.usecases;
 
-import com.app.contabilidad.domain.entities.Movimiento;
-import com.app.contabilidad.domain.services.MovimientoService;
-import com.app.contabilidad.application.dto.CrearMovimientoDTO;
-import lombok.RequiredArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
+import com.app.contabilidad.application.dto.CrearMovimientoDTO;
+import com.app.contabilidad.domain.entities.Movimiento;
+import com.app.contabilidad.domain.services.MovimientoService;
 
 /**
  * Caso de uso para gestionar movimientos (gastos y beneficios)

@@ -1,24 +1,33 @@
 package com.app.contabilidad.infrastructure.adapters.web;
 
-import com.app.contabilidad.application.usecases.GestionarMovimientosUseCase;
-import com.app.contabilidad.application.dto.CrearMovimientoDTO;
-import com.app.contabilidad.application.dto.ResumenMovimientosDTO;
-import com.app.contabilidad.domain.entities.Movimiento;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.app.contabilidad.application.constants.ApplicationConstants;
+import com.app.contabilidad.application.dto.CrearMovimientoDTO;
+import com.app.contabilidad.application.dto.ResumenMovimientosDTO;
+import com.app.contabilidad.application.usecases.GestionarMovimientosUseCase;
+import com.app.contabilidad.domain.constants.DomainConstants;
+import com.app.contabilidad.domain.entities.Movimiento;
+import com.app.contabilidad.infrastructure.constants.InfrastructureConstants;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Controlador web que adapta las peticiones HTTP a los casos de uso
  * Adaptador web de la arquitectura hexagonal
  */
 @Controller
-@RequestMapping("/movimientos")
+@RequestMapping(InfrastructureConstants.BASE_PATH)
 @RequiredArgsConstructor
 public class MovimientosController {
     private final GestionarMovimientosUseCase gestionarMovimientosUseCase;
@@ -31,22 +40,22 @@ public class MovimientosController {
         List<Movimiento> movimientos = gestionarMovimientosUseCase.listarMovimientos();
         ResumenMovimientosDTO resumen = calcularResumen(movimientos);
 
-        model.addAttribute("movimientos", movimientos);
-        model.addAttribute("resumen", resumen);
-        model.addAttribute("nuevo", new CrearMovimientoDTO());
+        model.addAttribute(ApplicationConstants.ATTR_MOVIMIENTOS, movimientos);
+        model.addAttribute(ApplicationConstants.ATTR_RESUMEN, resumen);
+        model.addAttribute(ApplicationConstants.ATTR_NUEVO, new CrearMovimientoDTO());
 
-        return "movimientos/lista";
+        return InfrastructureConstants.VIEW_LISTA;
     }
 
     /**
      * Muestra el formulario para crear un nuevo movimiento
      */
-    @GetMapping("/nuevo")
+    @GetMapping(InfrastructureConstants.ENDPOINT_NUEVO)
     public String mostrarFormularioCrear(Model model) {
-        model.addAttribute("movimiento", new CrearMovimientoDTO());
-        model.addAttribute("tiposMovimiento", Movimiento.TipoMovimiento.values());
-        model.addAttribute("categorias", obtenerCategorias());
-        return "movimientos/formulario";
+        model.addAttribute(ApplicationConstants.ATTR_MOVIMIENTO, new CrearMovimientoDTO());
+        model.addAttribute(ApplicationConstants.ATTR_TIPOS_MOVIMIENTO, Movimiento.TipoMovimiento.values());
+        model.addAttribute(ApplicationConstants.ATTR_CATEGORIAS, obtenerCategorias());
+        return InfrastructureConstants.VIEW_FORMULARIO;
     }
 
     /**
@@ -56,22 +65,22 @@ public class MovimientosController {
     public String crearMovimiento(@ModelAttribute CrearMovimientoDTO dto, RedirectAttributes redirectAttributes) {
         try {
             gestionarMovimientosUseCase.crearMovimiento(dto);
-            redirectAttributes.addFlashAttribute("mensaje", "Movimiento creado exitosamente");
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_MENSAJE, DomainConstants.MOVIMIENTO_CREADO);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al crear el movimiento: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_ERROR, DomainConstants.ERROR_CREAR_MOVIMIENTO + e.getMessage());
         }
-        return "redirect:/movimientos";
+        return InfrastructureConstants.REDIRECT_MOVIMIENTOS;
     }
 
     /**
      * Muestra el formulario para editar un movimiento
      */
-    @GetMapping("/{id}/editar")
+    @GetMapping(InfrastructureConstants.ENDPOINT_EDITAR)
     public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
         var movimiento = gestionarMovimientosUseCase.obtenerMovimiento(id);
 
         if (movimiento.isEmpty()) {
-            return "redirect:/movimientos";
+            return InfrastructureConstants.REDIRECT_MOVIMIENTOS;
         }
 
         Movimiento m = movimiento.get();
@@ -84,69 +93,69 @@ public class MovimientosController {
                 .notas(m.getNotas())
                 .build();
 
-        model.addAttribute("id", id);
-        model.addAttribute("movimiento", dto);
-        model.addAttribute("tiposMovimiento", Movimiento.TipoMovimiento.values());
-        model.addAttribute("categorias", obtenerCategorias());
-        return "movimientos/formulario-editar";
+        model.addAttribute(ApplicationConstants.ATTR_ID, id);
+        model.addAttribute(ApplicationConstants.ATTR_MOVIMIENTO, dto);
+        model.addAttribute(ApplicationConstants.ATTR_TIPOS_MOVIMIENTO, Movimiento.TipoMovimiento.values());
+        model.addAttribute(ApplicationConstants.ATTR_CATEGORIAS, obtenerCategorias());
+        return InfrastructureConstants.VIEW_FORMULARIO_EDITAR;
     }
 
     /**
      * Actualiza un movimiento
      */
-    @PostMapping("/{id}")
+    @PostMapping(InfrastructureConstants.ENDPOINT_EDITAR)
     public String actualizarMovimiento(@PathVariable Long id, @ModelAttribute CrearMovimientoDTO dto, RedirectAttributes redirectAttributes) {
         try {
             gestionarMovimientosUseCase.actualizarMovimiento(id, dto);
-            redirectAttributes.addFlashAttribute("mensaje", "Movimiento actualizado exitosamente");
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_MENSAJE, DomainConstants.MOVIMIENTO_ACTUALIZADO);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al actualizar el movimiento: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_ERROR, DomainConstants.ERROR_ACTUALIZAR_MOVIMIENTO + e.getMessage());
         }
-        return "redirect:/movimientos";
+        return InfrastructureConstants.REDIRECT_MOVIMIENTOS;
     }
 
     /**
      * Elimina un movimiento
      */
-    @GetMapping("/{id}/eliminar")
+    @GetMapping(InfrastructureConstants.ENDPOINT_ELIMINAR)
     public String eliminarMovimiento(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             gestionarMovimientosUseCase.eliminarMovimiento(id);
-            redirectAttributes.addFlashAttribute("mensaje", "Movimiento eliminado exitosamente");
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_MENSAJE, DomainConstants.MOVIMIENTO_ELIMINADO);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al eliminar el movimiento: " + e.getMessage());
+            redirectAttributes.addFlashAttribute(ApplicationConstants.ATTR_ERROR, DomainConstants.ERROR_ELIMINAR_MOVIMIENTO + e.getMessage());
         }
-        return "redirect:/movimientos";
+        return InfrastructureConstants.REDIRECT_MOVIMIENTOS;
     }
 
     /**
      * Muestra los movimientos filtrados por categoría
      */
-    @GetMapping("/categoria/{categoria}")
+    @GetMapping(InfrastructureConstants.ENDPOINT_CATEGORIA)
     public String listarPorCategoria(@PathVariable String categoria, Model model) {
         List<Movimiento> movimientos = gestionarMovimientosUseCase.obtenerMovimientosPorCategoria(categoria);
         ResumenMovimientosDTO resumen = calcularResumen(movimientos);
 
-        model.addAttribute("movimientos", movimientos);
-        model.addAttribute("resumen", resumen);
-        model.addAttribute("categoriaActual", categoria);
+        model.addAttribute(ApplicationConstants.ATTR_MOVIMIENTOS, movimientos);
+        model.addAttribute(ApplicationConstants.ATTR_RESUMEN, resumen);
+        model.addAttribute(ApplicationConstants.ATTR_CATEGORIA_ACTUAL, categoria);
 
-        return "movimientos/lista-categoria";
+        return InfrastructureConstants.VIEW_LISTA_CATEGORIA;
     }
 
     /**
      * Muestra la página de estadísticas (gráficos)
      */
-    @GetMapping("/estadisticas")
+    @GetMapping(InfrastructureConstants.ENDPOINT_ESTADISTICAS)
     public String mostrarEstadisticas(Model model) {
-        model.addAttribute("categorias", obtenerCategorias());
-        return "movimientos/estadisticas";
+        model.addAttribute(ApplicationConstants.ATTR_CATEGORIAS, obtenerCategorias());
+        return InfrastructureConstants.VIEW_ESTADISTICAS;
     }
 
     /**
      * Endpoint REST que devuelve totales por categoría para gastos (JSON)
      */
-    @GetMapping("/api/estadisticas")
+    @GetMapping(InfrastructureConstants.API_ENDPOINT_ESTADISTICAS)
     @ResponseBody
     public java.util.List<com.app.contabilidad.application.dto.CategoriaEstadisticaDTO> apiEstadisticas() {
         var totales = gestionarMovimientosUseCase.obtenerTotalesPorCategoria(com.app.contabilidad.domain.entities.Movimiento.TipoMovimiento.GASTO);
@@ -170,9 +179,9 @@ public class MovimientosController {
     /**
      * Página de inicio que redirige al listado de movimientos
      */
-    @GetMapping("/inicio")
+    @GetMapping(InfrastructureConstants.ENDPOINT_INICIO)
     public String inicio() {
-        return "redirect:/movimientos";
+        return InfrastructureConstants.REDIRECT_INICIO;
     }
 
     /**
@@ -196,15 +205,6 @@ public class MovimientosController {
      * Obtiene las categorías disponibles
      */
     private List<String> obtenerCategorias() {
-        return List.of(
-                "Alimentación",
-                "Transporte",
-                "Servicios",
-                "Salud",
-                "Educación",
-                "Entretenimiento",
-                "Hogar",
-                "Otros"
-        );
+        return List.of(ApplicationConstants.CATEGORIAS_LISTA);
     }
 }
