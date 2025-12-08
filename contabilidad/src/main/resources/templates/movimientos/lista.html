@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Movimientos del Hogar</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">💰 Contabilidad del Hogar</h1>
+            <ul class="nav-links">
+                <li><a href="/movimientos" class="nav-link active">Inicio</a></li>
+                <li><a href="/movimientos/nuevo" class="nav-link btn-primary">+ Nuevo Movimiento</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Alertas -->
+        <div th:if="${mensaje}" class="alert alert-success">
+            <p th:text="${mensaje}"></p>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <p th:text="${error}"></p>
+        </div>
+
+        <!-- Resumen -->
+        <div class="resumen-container" th:object="${resumen}">
+            <div class="resumen-card card-balance">
+                <h3>Balance Neto</h3>
+                <p class="amount" th:classappend="${resumen.balance < 0} ? 'negativo' : 'positivo'">
+                    <span th:text="${#numbers.formatDecimal(resumen.balance, 1, 2)}"></span> €
+                </p>
+            </div>
+
+            <div class="resumen-card card-beneficios">
+                <h3>Total Beneficios</h3>
+                <p class="amount positivo">
+                    <span th:text="${#numbers.formatDecimal(resumen.totalBeneficios, 1, 2)}"></span> €
+                </p>
+                <small th:text="'(' + ${resumen.cantidadBeneficios} + ' movimientos)'"></small>
+            </div>
+
+            <div class="resumen-card card-gastos">
+                <h3>Total Gastos</h3>
+                <p class="amount negativo">
+                    <span th:text="${#numbers.formatDecimal(resumen.totalGastos, 1, 2)}"></span> €
+                </p>
+                <small th:text="'(' + ${resumen.cantidadGastos} + ' movimientos)'"></small>
+            </div>
+
+            <div class="resumen-card card-movimientos">
+                <h3>Total Movimientos</h3>
+                <p class="amount">
+                    <span th:text="${resumen.cantidadMovimientos}"></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Tabla de movimientos -->
+        <div class="movimientos-section">
+            <h2>Movimientos Recientes</h2>
+
+            <div th:if="${movimientos.isEmpty()}" class="empty-state">
+                <p>No hay movimientos registrados aún.</p>
+                <a href="/movimientos/nuevo" class="btn btn-primary">Crear primer movimiento</a>
+            </div>
+
+            <table th:unless="${movimientos.isEmpty()}" class="movimientos-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Categoría</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="mov : ${movimientos}" th:classappend="${mov.tipo.name() == 'GASTO'} ? 'fila-gasto' : 'fila-beneficio'">
+                        <td th:text="${#temporals.format(mov.fecha, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${mov.descripcion}"></td>
+                        <td>
+                            <span class="categoria-badge" th:text="${mov.categoria}"></span>
+                        </td>
+                        <td>
+                            <span th:classappend="${mov.tipo.name() == 'GASTO'} ? 'tipo-gasto' : 'tipo-beneficio'"
+                                  th:text="${mov.tipo.name() == 'GASTO'} ? '📉 Gasto' : '📈 Beneficio'"></span>
+                        </td>
+                        <td class="cantidad" th:classappend="${mov.tipo.name() == 'GASTO'} ? 'negativo' : 'positivo'">
+                            <span th:text="${mov.tipo.name() == 'GASTO'} ? '-' : '+'"></span>
+                            <span th:text="${#numbers.formatDecimal(mov.cantidad, 1, 2)}"></span> €
+                        </td>
+                        <td class="acciones">
+                            <a th:href="@{/movimientos/{id}/editar(id=${mov.id})}" class="btn btn-small btn-edit">✏️ Editar</a>
+                            <a th:href="@{/movimientos/{id}/eliminar(id=${mov.id})}" class="btn btn-small btn-delete"
+                               onclick="return confirm('¿Seguro que deseas eliminar este movimiento?')">🗑️ Eliminar</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Gestor de Movimientos del Hogar - Todos los derechos reservados</p>
+    </footer>
+</body>
+</html>

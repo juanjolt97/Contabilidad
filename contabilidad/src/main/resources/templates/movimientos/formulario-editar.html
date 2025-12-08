@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Movimiento - Gestor de Movimientos del Hogar</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">💰 Contabilidad del Hogar</h1>
+            <ul class="nav-links">
+                <li><a href="/movimientos" class="nav-link">← Volver</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="formulario-container">
+            <h2>Editar Movimiento</h2>
+
+            <form th:action="@{/movimientos/{id}(id=${id})}" method="post" class="formulario" th:object="${movimiento}">
+                <div class="form-group">
+                    <label for="descripcion">Descripción *</label>
+                    <input type="text" id="descripcion" th:field="*{descripcion}" required
+                           placeholder="Ej: Compra de alimentos">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad (€) *</label>
+                        <input type="number" id="cantidad" th:field="*{cantidad}" step="0.01" required
+                               placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo">Tipo *</label>
+                        <select id="tipo" th:field="*{tipo}" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="GASTO">📉 Gasto</option>
+                            <option value="BENEFICIO">📈 Beneficio</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fecha">Fecha *</label>
+                        <input type="date" id="fecha" th:field="*{fecha}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="categoria">Categoría *</label>
+                        <select id="categoria" th:field="*{categoria}" required>
+                            <option value="">Seleccionar categoría</option>
+                            <option value="Alimentación">🍔 Alimentación</option>
+                            <option value="Transporte">🚗 Transporte</option>
+                            <option value="Servicios">🔧 Servicios</option>
+                            <option value="Salud">⚕️ Salud</option>
+                            <option value="Educación">📚 Educación</option>
+                            <option value="Entretenimiento">🎬 Entretenimiento</option>
+                            <option value="Hogar">🏠 Hogar</option>
+                            <option value="Otros">📋 Otros</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notas">Notas</label>
+                    <textarea id="notas" th:field="*{notas}" rows="4"
+                              placeholder="Información adicional sobre el movimiento"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">Actualizar Movimiento</button>
+                    <a href="/movimientos" class="btn btn-secondary btn-large">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Gestor de Movimientos del Hogar - Todos los derechos reservados</p>
+    </footer>
+</body>
+</html>
