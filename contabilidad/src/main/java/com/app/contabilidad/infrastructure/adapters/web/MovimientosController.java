@@ -135,6 +135,39 @@ public class MovimientosController {
     }
 
     /**
+     * Muestra la página de estadísticas (gráficos)
+     */
+    @GetMapping("/estadisticas")
+    public String mostrarEstadisticas(Model model) {
+        model.addAttribute("categorias", obtenerCategorias());
+        return "movimientos/estadisticas";
+    }
+
+    /**
+     * Endpoint REST que devuelve totales por categoría para gastos (JSON)
+     */
+    @GetMapping("/api/estadisticas")
+    @ResponseBody
+    public java.util.List<com.app.contabilidad.application.dto.CategoriaEstadisticaDTO> apiEstadisticas() {
+        var totales = gestionarMovimientosUseCase.obtenerTotalesPorCategoria(com.app.contabilidad.domain.entities.Movimiento.TipoMovimiento.GASTO);
+
+        java.math.BigDecimal totalBeneficios = gestionarMovimientosUseCase.calcularTotalBeneficios();
+
+        java.util.List<com.app.contabilidad.application.dto.CategoriaEstadisticaDTO> lista = new java.util.ArrayList<>();
+        totales.forEach((cat, val) -> {
+            double porcentaje = 0.0;
+            if (totalBeneficios != null && totalBeneficios.compareTo(java.math.BigDecimal.ZERO) > 0) {
+                porcentaje = val.divide(totalBeneficios, 4, java.math.RoundingMode.HALF_UP).multiply(new java.math.BigDecimal(100)).doubleValue();
+            }
+            lista.add(new com.app.contabilidad.application.dto.CategoriaEstadisticaDTO(cat, val, porcentaje));
+        });
+
+        // ordenar por total descendente
+        lista.sort((a,b) -> b.getTotal().compareTo(a.getTotal()));
+        return lista;
+    }
+
+    /**
      * Página de inicio que redirige al listado de movimientos
      */
     @GetMapping("/inicio")

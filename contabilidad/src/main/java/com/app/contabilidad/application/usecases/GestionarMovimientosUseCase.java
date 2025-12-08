@@ -101,4 +101,11 @@ public class GestionarMovimientosUseCase {
     public BigDecimal calcularBalance() {
         return movimientoService.calcularBalance();
     }
+
+    /**
+     * Devuelve totales por categoría para un tipo de movimiento (GASTO o BENEFICIO)
+     */
+    public java.util.Map<String, java.math.BigDecimal> obtenerTotalesPorCategoria(com.app.contabilidad.domain.entities.Movimiento.TipoMovimiento tipo) {
+        return movimientoService.sumarPorCategoria(tipo);
+    }
 }

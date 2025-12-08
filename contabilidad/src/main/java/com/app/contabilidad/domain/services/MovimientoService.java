@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Servicio de dominio que contiene la lógica de negocio relacionada con movimientos.
@@ -92,5 +94,14 @@ public class MovimientoService {
      */
     public void eliminarMovimiento(Long id) {
         movimientoRepository.eliminar(id);
+    }
+
+    /**
+     * Suma las cantidades por categoría filtrando por tipo (GASTO o BENEFICIO)
+     */
+    public Map<String, java.math.BigDecimal> sumarPorCategoria(Movimiento.TipoMovimiento tipo) {
+        return movimientoRepository.obtenerPorTipo(tipo).stream()
+                .collect(Collectors.groupingBy(Movimiento::getCategoria,
+                        Collectors.reducing(java.math.BigDecimal.ZERO, Movimiento::getCantidad, java.math.BigDecimal::add)));
     }
 }

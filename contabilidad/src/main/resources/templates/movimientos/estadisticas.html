@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Estadísticas - Contabilidad</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .charts { display:flex; gap:24px; flex-wrap:wrap; }
+        .chart-card { width: 480px; background: #fff; padding:16px; border-radius:8px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);} 
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">💰 Contabilidad del Hogar</h1>
+            <div class="nav-links">
+                <a href="/movimientos">Movimientos</a>
+                <a href="/movimientos/estadisticas">Estadísticas</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container">
+        <h2>Estadísticas por categoría (Gastos)</h2>
+        <p>Visualiza dónde se va más el dinero y los porcentajes por categoría.</p>
+
+        <div class="charts">
+            <div class="chart-card">
+                <h3>Distribución (%)</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Gastos por categoría</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Análisis (Doughnut)</h3>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+
+        <section style="margin-top:20px">
+            <h3>Recomendaciones</h3>
+            <ul id="recomendaciones"></ul>
+        </section>
+    </main>
+
+    <script>
+        async function fetchStats(){
+            const res = await fetch('/movimientos/api/estadisticas');
+            if(!res.ok) return null;
+            return await res.json();
+        }
+
+        function buildRecommendations(stats){
+            // sugerencias simples: marcar top categories para reducción
+            const recomendaciones = [];
+            if(stats.length === 0) return recomendaciones;
+            const top = stats[0];
+            recomendaciones.push(`Reduce gastos en "${top.categoria}" (actualmente ${top.porcentaje.toFixed(1)}% del total)`);
+            if(stats.length > 1){
+                const second = stats[1];
+                recomendaciones.push(`Revisa suscripciones o hábitos relacionados con "${second.categoria}" (${second.porcentaje.toFixed(1)}%)`);
+            }
+            return recomendaciones;
+        }
+
+        (async ()=>{
+            const stats = await fetchStats();
+            if(!stats) return;
+            const labels = stats.map(s=>s.categoria);
+            const data = stats.map(s=>parseFloat(s.total));
+            const colors = ['#4dc9f6','#f67019','#f53794','#537bc4','#acc236','#166a8f','#00a950','#58595b'];
+
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            new Chart(pieCtx, { type: 'pie', data: { labels, datasets:[{ data, backgroundColor: colors.slice(0, labels.length) }] } });
+
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            new Chart(barCtx, { type: 'bar', data: { labels, datasets:[{ label: 'Gastos', data, backgroundColor: colors.slice(0, labels.length) }] }, options: { scales:{ y:{ beginAtZero:true } } } });
+
+            const doughCtx = document.getElementById('doughnutChart').getContext('2d');
+            new Chart(doughCtx, { type: 'doughnut', data: { labels, datasets:[{ data, backgroundColor: colors.slice(0, labels.length) }] } });
+
+            const recs = buildRecommendations(stats);
+            const ul = document.getElementById('recomendaciones');
+            recs.forEach(r=>{ const li = document.createElement('li'); li.textContent = r; ul.appendChild(li); });
+        })();
+    </script>
+</body>
+</html>
