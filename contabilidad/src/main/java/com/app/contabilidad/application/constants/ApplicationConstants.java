@@ -13,6 +13,7 @@ public final class ApplicationConstants {
     public static final String ATTR_MOVIMIENTOS = "movimientos";
     public static final String ATTR_MOVIMIENTO = "movimiento";
     public static final String ATTR_RESUMEN = "resumen";
+    public static final String ATTR_RESUMENES_MENSUALES = "resumenMensual";
     public static final String ATTR_NUEVO = "nuevo";
     public static final String ATTR_TIPOS_MOVIMIENTO = "tiposMovimiento";
     public static final String ATTR_CATEGORIAS = "categorias";

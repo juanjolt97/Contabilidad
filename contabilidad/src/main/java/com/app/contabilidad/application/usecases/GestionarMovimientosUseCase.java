@@ -107,4 +107,66 @@ public class GestionarMovimientosUseCase {
     public java.util.Map<String, java.math.BigDecimal> obtenerTotalesPorCategoria(com.app.contabilidad.domain.entities.Movimiento.TipoMovimiento tipo) {
         return movimientoService.sumarPorCategoria(tipo);
     }
+
+    /**
+     * Obtiene el resumen de movimientos por mes
+     */
+    public List<com.app.contabilidad.application.dto.ResumenMensualDTO> obtenerResumenPorMes() {
+        java.util.Map<String, List<Movimiento>> movimientosPorMes = movimientoService.agruparPorMes();
+        
+        List<com.app.contabilidad.application.dto.ResumenMensualDTO> resumenes = new java.util.ArrayList<>();
+        
+        movimientosPorMes.forEach((mes, movimientos) -> {
+            BigDecimal totalGastos = movimientos.stream()
+                    .filter(m -> m.getTipo() == Movimiento.TipoMovimiento.GASTO)
+                    .map(Movimiento::getCantidad)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            BigDecimal totalBeneficios = movimientos.stream()
+                    .filter(m -> m.getTipo() == Movimiento.TipoMovimiento.BENEFICIO)
+                    .map(Movimiento::getCantidad)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            long cantidadGastos = movimientos.stream()
+                    .filter(m -> m.getTipo() == Movimiento.TipoMovimiento.GASTO)
+                    .count();
+            
+            long cantidadBeneficios = movimientos.stream()
+                    .filter(m -> m.getTipo() == Movimiento.TipoMovimiento.BENEFICIO)
+                    .count();
+            
+            resumenes.add(com.app.contabilidad.application.dto.ResumenMensualDTO.builder()
+                    .mes(mes)
+                    .mesFormato(formatearMes(mes))
+                    .totalGastos(totalGastos)
+                    .totalBeneficios(totalBeneficios)
+                    .balance(totalBeneficios.subtract(totalGastos))
+                    .cantidadGastos(cantidadGastos)
+                    .cantidadBeneficios(cantidadBeneficios)
+                    .totalMovimientos(cantidadGastos + cantidadBeneficios)
+                    .build());
+        });
+        
+        // Ordenar por mes descendente (más recientes primero)
+        resumenes.sort((a, b) -> b.getMes().compareTo(a.getMes()));
+        return resumenes;
+    }
+
+    /**
+     * Formatea el mes en formato "Mes Año" (ej: "Enero 2025")
+     */
+    private String formatearMes(String mesCodigo) {
+        try {
+            String[] partes = mesCodigo.split("-");
+            int anio = Integer.parseInt(partes[0]);
+            int mes = Integer.parseInt(partes[1]);
+            
+            String[] meses = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+            
+            return meses[mes - 1] + " " + anio;
+        } catch (Exception e) {
+            return mesCodigo;
+        }
+    }
 }

@@ -153,6 +153,16 @@ public class MovimientosController {
     }
 
     /**
+     * Muestra la página de resumen mensual
+     */
+    @GetMapping(InfrastructureConstants.ENDPOINT_RESUMEN_MENSUAL)
+    public String mostrarResumenMensual(Model model) {
+        List<com.app.contabilidad.application.dto.ResumenMensualDTO> resumenes = gestionarMovimientosUseCase.obtenerResumenPorMes();
+        model.addAttribute(ApplicationConstants.ATTR_RESUMENES_MENSUALES, resumenes);
+        return InfrastructureConstants.VIEW_RESUMEN_MENSUAL;
+    }
+
+    /**
      * Endpoint REST que devuelve totales por categoría para gastos (JSON)
      */
     @GetMapping(InfrastructureConstants.API_ENDPOINT_ESTADISTICAS)
@@ -174,6 +184,15 @@ public class MovimientosController {
         // ordenar por total descendente
         lista.sort((a,b) -> b.getTotal().compareTo(a.getTotal()));
         return lista;
+    }
+
+    /**
+     * Endpoint REST que devuelve el resumen mensual (JSON)
+     */
+    @GetMapping(InfrastructureConstants.API_ENDPOINT_RESUMEN_MENSUAL)
+    @ResponseBody
+    public java.util.List<com.app.contabilidad.application.dto.ResumenMensualDTO> apiResumenMensual() {
+        return gestionarMovimientosUseCase.obtenerResumenPorMes();
     }
 
     /**

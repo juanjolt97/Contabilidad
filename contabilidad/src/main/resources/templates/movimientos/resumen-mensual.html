@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen Mensual - Contabilidad</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .resumen-container {
+            margin-top: 30px;
+        }
+
+        .tabla-resumen {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabla-resumen thead {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .tabla-resumen th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 3px solid #2980b9;
+        }
+
+        .tabla-resumen tbody tr {
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.3s;
+        }
+
+        .tabla-resumen tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .tabla-resumen td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .mes-header {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .valor-positivo {
+            color: #27ae60;
+            font-weight: 600;
+        }
+
+        .valor-negativo {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .valor-neutro {
+            color: #34495e;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 2px;
+        }
+
+        .badge-gasto {
+            background-color: #ffe5e5;
+            color: #c0392b;
+        }
+
+        .badge-beneficio {
+            background-color: #e5ffe5;
+            color: #27ae60;
+        }
+
+        .total-row {
+            background-color: #ecf0f1;
+            font-weight: 600;
+        }
+
+        .total-row td {
+            padding: 12px 15px;
+            border-top: 2px solid #bdc3c7;
+            border-bottom: 2px solid #bdc3c7;
+        }
+
+        .estado-mensaje {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .estado-vacio {
+            background-color: #e8f4f8;
+            color: #2c3e50;
+            border: 1px solid #d6eef5;
+        }
+
+        .header-seccion {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+        }
+
+        .header-seccion h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .filtros {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+
+        .filtros button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .filtros button:hover {
+            background-color: #2980b9;
+        }
+
+        .resumen-totales {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tarjeta-total {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .tarjeta-total h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #7f8c8d;
+        }
+
+        .tarjeta-total .valor {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .tarjeta-gastos {
+            background-color: #ffe5e5;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .tarjeta-gastos .valor {
+            color: #c0392b;
+        }
+
+        .tarjeta-beneficios {
+            background-color: #e5ffe5;
+            border-left: 4px solid #27ae60;
+        }
+
+        .tarjeta-beneficios .valor {
+            color: #27ae60;
+        }
+
+        .tarjeta-balance {
+            background-color: #e5f5ff;
+            border-left: 4px solid #3498db;
+        }
+
+        .tarjeta-balance .valor {
+            color: #2c3e50;
+        }
+
+        @media print {
+            .filtros, .navbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">💰 Contabilidad</div>
+            <ul class="nav-menu">
+                <li><a href="/movimientos" class="nav-link">Movimientos</a></li>
+                <li><a href="/movimientos/nuevo" class="nav-link">Crear</a></li>
+                <li><a href="/movimientos/estadisticas" class="nav-link">Estadísticas</a></li>
+                <li><a href="/movimientos/resumen" class="nav-link active">Resumen</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Mensajes de feedback -->
+        <div th:if="${mensaje}" class="mensaje-exito">
+            <strong>✓</strong> <span th:text="${mensaje}"></span>
+        </div>
+        <div th:if="${error}" class="mensaje-error">
+            <strong>✗</strong> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="header-seccion">
+            <h2>📊 Resumen por Mes</h2>
+        </div>
+
+        <p style="color: #7f8c8d; margin-bottom: 20px;">
+            Visualiza el resumen de tus gastos y beneficios organizados por mes
+        </p>
+
+        <!-- Filtros -->
+        <div class="filtros">
+            <button onclick="exportarExcel()">📥 Exportar a Excel</button>
+            <button onclick="window.print()" style="background-color: #95a5a6; margin-left: 10px;">🖨️ Imprimir</button>
+        </div>
+
+        <!-- Verificación de datos vacíos -->
+        <div th:if="${#lists.isEmpty(resumenMensual)}" class="estado-mensaje estado-vacio">
+            <p>No hay datos de movimientos para mostrar. 
+            <a href="/movimientos/nuevo" style="color: #3498db; text-decoration: underline;">Crear nuevo movimiento</a></p>
+        </div>
+
+        <!-- Tabla de resumen mensual -->
+        <div th:if="${not #lists.isEmpty(resumenMensual)}" class="resumen-container">
+            <!-- Totales generales -->
+            <div class="resumen-totales">
+                <div class="tarjeta-gastos">
+                    <h4>Total Gastos</h4>
+                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getTotalGastos()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                </div>
+                <div class="tarjeta-beneficios">
+                    <h4>Total Beneficios</h4>
+                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getTotalBeneficios()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                </div>
+                <div class="tarjeta-balance">
+                    <h4>Balance Total</h4>
+                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getBalance()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                </div>
+            </div>
+
+            <!-- Tabla principal -->
+            <table class="tabla-resumen">
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Beneficios</th>
+                        <th>Gastos</th>
+                        <th>Balance</th>
+                        <th>Movimientos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="resumen : ${resumenMensual}">
+                        <td class="mes-header" th:text="${resumen.mesFormato}"></td>
+                        <td>
+                            <span class="valor-positivo" th:text="${resumen.totalBeneficios}"></span>
+                            <span class="badge badge-beneficio" th:text="${resumen.cantidadBeneficios} + ' ingresos'"></span>
+                        </td>
+                        <td>
+                            <span class="valor-negativo" th:text="${resumen.totalGastos}"></span>
+                            <span class="badge badge-gasto" th:text="${resumen.cantidadGastos} + ' gastos'"></span>
+                        </td>
+                        <td>
+                            <span th:classappend="${resumen.balance.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'valor-positivo' : 'valor-negativo'" 
+                                  th:text="${resumen.balance}"></span>
+                        </td>
+                        <td th:text="${resumen.totalMovimientos}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Fila de totales -->
+            <table class="tabla-resumen" style="margin-top: 0; border-top: none;">
+                <tbody>
+                    <tr class="total-row">
+                        <td><strong>TOTALES</strong></td>
+                        <td>
+                            <span class="valor-positivo" 
+                                  th:text="${resumenMensual.stream().map(r -> r.getTotalBeneficios()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                        </td>
+                        <td>
+                            <span class="valor-negativo" 
+                                  th:text="${resumenMensual.stream().map(r -> r.getTotalGastos()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                        </td>
+                        <td>
+                            <span class="valor-positivo" 
+                                  th:text="${resumenMensual.stream().map(r -> r.getBalance()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                        </td>
+                        <td>
+                            <span th:text="${resumenMensual.stream().map(r -> r.getTotalMovimientos()).reduce(0L, T(java.lang.Long)::sum)}"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function exportarExcel() {
+            // Obtener la tabla
+            const tabla = document.querySelector('.tabla-resumen');
+            if (!tabla) {
+                alert('No hay datos para exportar');
+                return;
+            }
+
+            // Crear CSV
+            let csv = 'Mes,Beneficios,Gastos,Balance,Movimientos\n';
+            const filas = tabla.querySelectorAll('tbody tr');
+            
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('td');
+                if (celdas.length > 0) {
+                    const mes = celdas[0].textContent.trim();
+                    const beneficios = celdas[1].textContent.split(' ')[0].trim();
+                    const gastos = celdas[2].textContent.split(' ')[0].trim();
+                    const balance = celdas[3].textContent.split(' ')[0].trim();
+                    const movimientos = celdas[4].textContent.trim();
+                    
+                    csv += `"${mes}","${beneficios}","${gastos}","${balance}","${movimientos}"\n`;
+                }
+            });
+
+            // Descargar
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `resumen-mensual-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

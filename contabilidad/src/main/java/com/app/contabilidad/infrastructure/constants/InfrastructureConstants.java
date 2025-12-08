@@ -20,10 +20,12 @@ public final class InfrastructureConstants {
     public static final String ENDPOINT_ELIMINAR = "/{id}/eliminar";
     public static final String ENDPOINT_CATEGORIA = "/categoria/{categoria}";
     public static final String ENDPOINT_ESTADISTICAS = "/estadisticas";
+    public static final String ENDPOINT_RESUMEN_MENSUAL = "/resumen";
     public static final String ENDPOINT_INICIO = "/inicio";
 
     // Endpoints API
     public static final String API_ENDPOINT_ESTADISTICAS = "/api/estadisticas";
+    public static final String API_ENDPOINT_RESUMEN_MENSUAL = "/api/resumen";
 
     // Nombres de vistas (templates)
     public static final String VIEW_LISTA = "movimientos/lista";
@@ -31,6 +33,7 @@ public final class InfrastructureConstants {
     public static final String VIEW_FORMULARIO_EDITAR = "movimientos/formulario-editar";
     public static final String VIEW_LISTA_CATEGORIA = "movimientos/lista-categoria";
     public static final String VIEW_ESTADISTICAS = "movimientos/estadisticas";
+    public static final String VIEW_RESUMEN_MENSUAL = "movimientos/resumen-mensual";
 
     // Redirecciones
     public static final String REDIRECT_MOVIMIENTOS = "redirect:/movimientos";
@@ -43,6 +46,7 @@ public final class InfrastructureConstants {
     // Emojis y símbolos
     public static final String EMOJI_EDITAR = "✏️ Editar";
     public static final String EMOJI_ELIMINAR = "🗑️ Eliminar";
+    public static final String EMOJI_RESUMEN = "📊 Resumen";
     public static final String EMOJI_ALIMENTACION = "🍔 Alimentación";
     public static final String EMOJI_TRANSPORTE = "🚗 Transporte";
     public static final String EMOJI_SERVICIOS = "🔧 Servicios";

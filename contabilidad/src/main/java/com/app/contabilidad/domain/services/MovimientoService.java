@@ -1,14 +1,13 @@
 package com.app.contabilidad.domain.services;
 
-import com.app.contabilidad.domain.entities.Movimiento;
-import com.app.contabilidad.domain.ports.MovimientoRepositoryPort;
-import lombok.RequiredArgsConstructor;
-
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.app.contabilidad.domain.entities.Movimiento;
+import com.app.contabilidad.domain.ports.MovimientoRepositoryPort;
 
 /**
  * Servicio de dominio que contiene la lógica de negocio relacionada con movimientos.
@@ -103,5 +102,17 @@ public class MovimientoService {
         return movimientoRepository.obtenerPorTipo(tipo).stream()
                 .collect(Collectors.groupingBy(Movimiento::getCategoria,
                         Collectors.reducing(java.math.BigDecimal.ZERO, Movimiento::getCantidad, java.math.BigDecimal::add)));
+    }
+
+    /**
+     * Agrupa todos los movimientos por mes (año-mes)
+     * Retorna un Map donde la clave es el formato "YYYY-MM" y el valor es una lista de movimientos
+     */
+    public Map<String, List<Movimiento>> agruparPorMes() {
+        return movimientoRepository.obtenerTodos().stream()
+                .collect(Collectors.groupingBy(m -> {
+                    java.time.LocalDate fecha = m.getFecha();
+                    return String.format("%04d-%02d", fecha.getYear(), fecha.getMonthValue());
+                }));
     }
 }
