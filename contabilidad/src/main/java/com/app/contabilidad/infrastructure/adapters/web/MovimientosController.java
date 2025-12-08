@@ -158,7 +158,28 @@ public class MovimientosController {
     @GetMapping(InfrastructureConstants.ENDPOINT_RESUMEN_MENSUAL)
     public String mostrarResumenMensual(Model model) {
         List<com.app.contabilidad.application.dto.ResumenMensualDTO> resumenes = gestionarMovimientosUseCase.obtenerResumenPorMes();
+        
+        // Calcular totales globales
+        java.math.BigDecimal totalGastos = resumenes.stream()
+                .map(r -> r.getTotalGastos())
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        
+        java.math.BigDecimal totalBeneficios = resumenes.stream()
+                .map(r -> r.getTotalBeneficios())
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        
+        java.math.BigDecimal balance = totalBeneficios.subtract(totalGastos);
+        
+        long totalMovimientos = resumenes.stream()
+                .mapToLong(r -> r.getTotalMovimientos())
+                .sum();
+        
         model.addAttribute(ApplicationConstants.ATTR_RESUMENES_MENSUALES, resumenes);
+        model.addAttribute("totalGastosGlobal", totalGastos);
+        model.addAttribute("totalBeneficiosGlobal", totalBeneficios);
+        model.addAttribute("balanceGlobal", balance);
+        model.addAttribute("totalMovimientosGlobal", totalMovimientos);
+        
         return InfrastructureConstants.VIEW_RESUMEN_MENSUAL;
     }
 
