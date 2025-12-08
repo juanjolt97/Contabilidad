@@ -250,19 +250,19 @@
 
         <!-- Tabla de resumen mensual -->
         <div th:if="${not #lists.isEmpty(resumenMensual)}" class="resumen-container">
-            <!-- Totales generales -->
+            <!-- Totales generales calculados en el controlador -->
             <div class="resumen-totales">
                 <div class="tarjeta-gastos">
                     <h4>Total Gastos</h4>
-                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getTotalGastos()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                    <div class="valor" th:text="${totalGastosGlobal}"></div>
                 </div>
                 <div class="tarjeta-beneficios">
                     <h4>Total Beneficios</h4>
-                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getTotalBeneficios()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                    <div class="valor" th:text="${totalBeneficiosGlobal}"></div>
                 </div>
                 <div class="tarjeta-balance">
                     <h4>Balance Total</h4>
-                    <div class="valor" th:text="${resumenMensual.stream().map(r -> r.getBalance()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></div>
+                    <div class="valor" th:text="${balanceGlobal}"></div>
                 </div>
             </div>
 
@@ -289,7 +289,7 @@
                             <span class="badge badge-gasto" th:text="${resumen.cantidadGastos} + ' gastos'"></span>
                         </td>
                         <td>
-                            <span th:classappend="${resumen.balance.compareTo(T(java.math.BigDecimal).ZERO) >= 0} ? 'valor-positivo' : 'valor-negativo'" 
+                            <span th:classappend="${resumen.balance >= 0} ? 'valor-positivo' : 'valor-negativo'" 
                                   th:text="${resumen.balance}"></span>
                         </td>
                         <td th:text="${resumen.totalMovimientos}"></td>
@@ -304,18 +304,18 @@
                         <td><strong>TOTALES</strong></td>
                         <td>
                             <span class="valor-positivo" 
-                                  th:text="${resumenMensual.stream().map(r -> r.getTotalBeneficios()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                                  th:text="${totalBeneficiosGlobal}"></span>
                         </td>
                         <td>
                             <span class="valor-negativo" 
-                                  th:text="${resumenMensual.stream().map(r -> r.getTotalGastos()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                                  th:text="${totalGastosGlobal}"></span>
                         </td>
                         <td>
                             <span class="valor-positivo" 
-                                  th:text="${resumenMensual.stream().map(r -> r.getBalance()).reduce(T(java.math.BigDecimal).ZERO, T(java.math.BigDecimal)::add)}"></span>
+                                  th:text="${balanceGlobal}"></span>
                         </td>
                         <td>
-                            <span th:text="${resumenMensual.stream().map(r -> r.getTotalMovimientos()).reduce(0L, T(java.lang.Long)::sum)}"></span>
+                            <span th:text="${totalMovimientosGlobal}"></span>
                         </td>
                     </tr>
                 </tbody>
