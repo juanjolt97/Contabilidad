@@ -22,7 +22,8 @@
         <div class="formulario-container">
             <h2>Editar Movimiento</h2>
 
-            <form th:action="@{/movimientos/{id}(id=${id})}" method="post" class="formulario" th:object="${movimiento}">
+            <form th:action="@{/movimientos/{id}/editar(id=${id})}" method="post" class="formulario" th:object="${movimiento}">
+                <input type="hidden" name="id" th:value="${id}">
                 <div class="form-group">
                     <label for="descripcion">Descripción *</label>
                     <input type="text" id="descripcion" th:field="*{descripcion}" required

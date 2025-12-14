@@ -76,9 +76,12 @@
                             <span th:text="${#numbers.formatDecimal(mov.cantidad, 1, 2)}"></span> €
                         </td>
                         <td class="acciones">
-                            <a th:href="@{/movimientos/{id}/editar(id=${mov.id})}" class="btn btn-small btn-edit">✏️ Editar</a>
-                            <a th:href="@{/movimientos/{id}/eliminar(id=${mov.id})}" class="btn btn-small btn-delete"
-                               onclick="return confirm('¿Seguro que deseas eliminar este movimiento?')">🗑️ Eliminar</a>
+                            <form th:action="@{/movimientos/{id}/editar(id=${mov.id})}" method="get" style="display:inline;">
+                                <button type="submit" class="btn btn-small btn-edit">✏️ Editar</button>
+                            </form>
+                            <form th:action="@{/movimientos/{id}/eliminar(id=${mov.id})}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este movimiento?')">
+                                <button type="submit" class="btn btn-small btn-delete">🗑️ Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 </tbody>

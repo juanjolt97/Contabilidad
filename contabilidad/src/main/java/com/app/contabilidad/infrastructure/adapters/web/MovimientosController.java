@@ -43,6 +43,8 @@ public class MovimientosController {
         model.addAttribute(ApplicationConstants.ATTR_MOVIMIENTOS, movimientos);
         model.addAttribute(ApplicationConstants.ATTR_RESUMEN, resumen);
         model.addAttribute(ApplicationConstants.ATTR_NUEVO, new CrearMovimientoDTO());
+        // Añadimos las categorías al modelo para poder filtrar desde la vista
+        model.addAttribute(ApplicationConstants.ATTR_CATEGORIAS, obtenerCategorias());
 
         return InfrastructureConstants.VIEW_LISTA;
     }
@@ -117,7 +119,7 @@ public class MovimientosController {
     /**
      * Elimina un movimiento
      */
-    @GetMapping(InfrastructureConstants.ENDPOINT_ELIMINAR)
+    @PostMapping(InfrastructureConstants.ENDPOINT_ELIMINAR)
     public String eliminarMovimiento(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             gestionarMovimientosUseCase.eliminarMovimiento(id);

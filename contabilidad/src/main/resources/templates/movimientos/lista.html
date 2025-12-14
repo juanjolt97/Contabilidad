@@ -63,7 +63,30 @@
 
         <!-- Tabla de movimientos -->
         <div class="movimientos-section">
+
             <h2>Movimientos Recientes</h2>
+
+            <!-- Filtro por categoría -->
+            <div class="filtro-categoria">
+                <label for="filtroCategoria">Filtrar por categoría:</label>
+                <select id="filtroCategoria" onchange="filtrarCategoria(this.value)">
+                    <option value="">Todas</option>
+                    <option th:each="cat : ${categorias}"
+                            th:value="${cat}"
+                            th:text="${cat}"
+                            th:selected="${cat == categoriaActual}"></option>
+                </select>
+            </div>
+
+            <script>
+                function filtrarCategoria(cat) {
+                    if (!cat) {
+                        window.location.href = '/movimientos';
+                        return;
+                    }
+                    window.location.href = '/movimientos/categoria/' + encodeURIComponent(cat);
+                }
+            </script>
 
             <div th:if="${movimientos.isEmpty()}" class="empty-state">
                 <p>No hay movimientos registrados aún.</p>
@@ -100,7 +123,9 @@
                             <form th:action="@{/movimientos/{id}/editar(id=${mov.id})}" method="get" style="display:inline;">
                                 <button type="submit" class="btn btn-small btn-edit">✏️ Editar</button>
                             </form>
-                            <form th:action="@{/movimientos/{id}/eliminar(id=${mov.id})}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este movimiento?')">
+                            <form th:action="@{/movimientos/{id}/eliminar(id=${mov.id})}" method="post" class="formulario"
+                            style="display:inline;" onsubmit="return confirm('¿Seguro que deseas eliminar este movimiento?')">
+                                <input type="hidden" name="id" th:value="${id}">
                                 <button type="submit" class="btn btn-small btn-delete">🗑️ Eliminar</button>
                             </form>
                         </td>
